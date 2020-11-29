@@ -6,10 +6,10 @@
 </head>
 <body>
 <h1>ToDoリスト</h1>
-<form name="form" action="">
-<input type="radio" name="type" value="all" onclick="changeDisplay()" checked="checked">すべて
-<input type="radio" name="type" value="working" onclick="changeDisplay()">作業中
-<input type="radio" name="type" value="comp" onclick="changeDisplay()">完了
+<form name="form" id="form" action="">
+<input type="radio" name="type" value="all" checked="checked">すべて
+<input type="radio" name="type" value="working">作業中
+<input type="radio" name="type" value="comp">完了
 
 <Table border="0" id="table">
 <tr style="font-weight:bold;">
@@ -24,42 +24,101 @@
 <input type="button" id="add" value="追加">
 </form>
 <script>
-//ID管理変数
-let inputId = 0;
+//アウトプット配列作成
+const todoList = [];
 
 //実行
 const eleAdd = document.getElementById('add');
-eleAdd.addEventListener('click', (e) => {
+eleAdd.addEventListener('click', () => {
 
     //テキストフィールドオブジェクト生成
     const inputComment = document.getElementById('input').value;
 
-    //アウトプット用pタグ生成 & インプット
+    //インプット
+    todoList.push({
+        id:todoList.length,
+        comment:inputComment,
+        status:'作業中',
+        delete:'削除'
+    });
+
+    //表示更新
+    changeDisplay();
+});
+
+//表示更新
+const eleSelectType = document.getElementById('form');
+eleSelectType.addEventListener('change',changeDisplay,false);
+
+function changeDisplay(){
+
+    //テーブルをオブジェクト化
+    const eleTable = document.getElementById('table');
+
+    //ヘッダ以外のテーブル行削除(初期化)
+    while(eleTable.rows[1]) eleTable.deleteRow(1);
+
+    //ラジオボタンの状態取得
+    selectType = eleSelectType.type.value;
+
+    //配列数取得
+    const aryNum = todoList.length;
+
+    switch(selectType){
+        case 'all':
+            for(let cntAry = 0;cntAry < aryNum;cntAry++){
+                //テーブルデータ追加
+                addTable(cntAry);
+            }
+        break;
+        case 'working':
+            for(let cntAry = 0;cntAry < aryNum;cntAry++){
+
+                    //「作業中」は表示
+                    if(todoList[cntAry]['status'] === '作業中'){
+                        //テーブルデータ追加
+                        addTable(cntAry);
+                    }
+                }
+        break;
+        case 'comp':
+            for(let cntAry = 0;cntAry < aryNum;cntAry++){
+
+                //「完了」は表示
+                if(todoList[cntAry]['status'] === '完了'){
+                    //テーブルデータ追加
+                    addTable(cntAry);
+                }
+            }
+        break;
+    }
+}
+
+//テーブルデータ追加
+function addTable(cntAry){
+
+    //ID作成
     const eleOutputId = document.createElement('p');
-    eleOutputId.setAttribute('id','id' + inputId);
-    eleOutputId.textContent = inputId;
+    eleOutputId.setAttribute('id','id' + cntAry);
+    eleOutputId.textContent = todoList[cntAry]['id'];
     eleOutputId.style.margin = '0';
 
-    //コメント
+    //コメント作成
     const eleOutputComment = document.createElement('p');
-    eleOutputComment.textContent = inputComment;
+    eleOutputComment.textContent = todoList[cntAry]['comment'];
     eleOutputComment.style.margin = '0';
 
-    //状態
+    //状態ボタン作成
     const eleOutputStatus = document.createElement('input');
-    eleOutputStatus.setAttribute('id','status' + inputId);
+    eleOutputStatus.setAttribute('id','status' + cntAry);
     eleOutputStatus.setAttribute('type','button');
-    eleOutputStatus.setAttribute('value','作業中');
-    eleOutputStatus.setAttribute('onclick','SwitchStatus(' + inputId + ');');
-    eleOutputStatus.style.margin = '0';
+    eleOutputStatus.setAttribute('value',todoList[cntAry]['status']);
 
-    //削除
+    //削除ボタン作成
     const eleOutputDelete = document.createElement('input');
-    eleOutputDelete.setAttribute('id','delete' + inputId);
+    eleOutputDelete.setAttribute('id','delete' + cntAry);
     eleOutputDelete.setAttribute('type','button');
-    eleOutputDelete.setAttribute('value','削除');
-    eleOutputDelete.setAttribute('onclick','DeleteRow(' + inputId + ');');
-    eleOutputDelete.style.margin = '0';
+    eleOutputDelete.setAttribute('value',todoList[cntAry]['delete']);
 
     //テーブルをオブジェクト化
     const eleTable = document.getElementById('table');
@@ -80,127 +139,71 @@ eleAdd.addEventListener('click', (e) => {
     cellTable = rowTable.insertCell();
     cellTable.appendChild(eleOutputDelete);
 
-    //表示更新
-    changeDisplay();
+    //状態ボタンに関数紐付け
+    const eleSelectType = document.getElementById('status' + cntAry);
+    eleSelectType.addEventListener('click',{num:cntAry,handleEvent:switchStatus},false);
 
-    inputId++;
-});
-
-//表示切替
-function changeDisplay(){
-
-    //テーブルをオブジェクト化
-    const eleTable = document.getElementById('table');
-    
-    //行数取得
-    rowTableNum = eleTable.rows.length;
-
-    //チャックボックス判定用配列
-    const aryStatus = document.form.type;
-
-    //チェックボックスの内容保存変数
-    let saveStatus = '';
-
-    //チェックボックス判定
-	for (let cntCheckBox = 0;cntCheckBox < aryStatus.length;cntCheckBox++){
-		if(aryStatus[cntCheckBox].checked){ 
-		    saveStatus = aryStatus[cntCheckBox].value;
-		}
-	}
-
-    switch(saveStatus){
-        case 'all':
-            for(let cntRow = 1;cntRow < rowTableNum;cntRow++){
-                //IDが0始まりでテーブルが1始まりなので1減算
-                const eleStatus = document.getElementById('status' + (cntRow - 1));
-
-                //行を表示
-                eleTable.rows[cntRow].style.display = '';
-            }
-        break;
-        case 'working':
-            for(let cntRow = 1;cntRow < rowTableNum;cntRow++){
-                //IDが0始まりでテーブルが1始まりなので1減算
-                const eleStatus = document.getElementById('status' + (cntRow - 1));
-
-                if(eleStatus.value === '作業中'){
-                    //「作業中」を表示
-                    eleTable.rows[cntRow].style.display = '';
-                }else{
-                    //「完了」を非表示
-                    eleTable.rows[cntRow].style.display = 'none';
-                }       
-            }
-        break;
-        case 'comp':
-            for(let cntRow = 1;cntRow < rowTableNum;cntRow++){
-                //IDが0始まりでテーブルが1始まりなので1減算
-                const eleStatus = document.getElementById('status' + (cntRow - 1));
-                
-                if(eleStatus.value === '完了'){
-                    //「作業中」を表示
-                    eleTable.rows[cntRow].style.display = '';
-                }else{
-                    //「完了」を非表示
-                    eleTable.rows[cntRow].style.display = 'none';
-                }
-            }
-        break;
-    }
+    //削除ボタンに関数紐付け
+    const eleDelete = document.getElementById('delete' + cntAry);
+    eleDelete.addEventListener('click',{num:cntAry,handleEvent:deleteAry},false);
 }
 
 //状態切り替え
-function SwitchStatus(rowNum){
+function switchStatus(){
 
-    const eleStatus = document.getElementById('status' + rowNum);
-    if(eleStatus.value === '作業中'){
-        eleStatus.value = '完了';
+    //引数取得
+    const cntAry = this.num;
+
+    if(todoList[cntAry]['status'] === '作業中'){
+        todoList[cntAry]['status'] = '完了';
     }else{
-        eleStatus.value = '作業中';
+        todoList[cntAry]['status'] = '作業中';
     }
+
+    //表示更新
+    changeDisplay();
 }
 
-//行削除
-function DeleteRow(rowNum){
+//配列削除
+function deleteAry(){
 
-    //テーブルをオブジェクト化
-    const eleTable = document.getElementById('table');
+    //引数取得
+    const cntAry = this.num;
 
-    //行削除(IDは0始まりでテーブルの行は1始まりなので、1加算)
-    eleTable.deleteRow(rowNum + 1);
+    //配列削除
+    todoList.splice(cntAry, 1);
 
     //idの振り直し
-    Reassign(eleTable.rows.length,rowNum);
+    aryReassign();
+
+    //表示更新
+    changeDisplay();
 }
 
 //idの振り直し
-function Reassign(rowTableNum,rowNum){
-    
-    //テーブルの行数-選択された行数分ループ
-    for (let cntRow = rowNum + 1;cntRow < rowTableNum;cntRow++){
+function aryReassign(){
+
+    //配列数取得
+    const aryNum = todoList.length;
+
+    //配列分ループ
+    for(let cntAry = 0;cntAry < aryNum;cntAry++){
 
         //変更対象のエレメントのオブジェクト化
-        const eleId = document.getElementById('id' + cntRow);
-        const eleStatus = document.getElementById('status' + cntRow);
-        const eleDelete = document.getElementById('delete' + cntRow);
-
-        //変更後のID
-        chgId = cntRow - 1;
+        const eleId = document.getElementById('id' + cntAry);
+        const eleStatus = document.getElementById('status' + cntAry);
+        const eleDelete = document.getElementById('delete' + cntAry);
 
         //idの振り直し
-        eleId.setAttribute('id','id' + chgId);
-        eleId.textContent = chgId;
+        todoList[cntAry]['id'] = cntAry;
+        eleId.setAttribute('id','id' + cntAry);
 
         //状態の振り直し
-        eleStatus.setAttribute('id','status' + chgId);
-        eleStatus.setAttribute('onclick','SwitchStatus(' + chgId + ');');
+        eleStatus.setAttribute('id','status' + cntAry);
 
         //削除の振り直し
-        eleDelete.setAttribute('id','delete' + chgId);
-        eleDelete.setAttribute('onclick','DeleteRow(' + chgId + ');');
+        eleDelete.setAttribute('id','delete' + cntAry);
     }
-    //テーブルの行数を更新
-    inputId = rowTableNum - 1;
 }
 
 </script>
