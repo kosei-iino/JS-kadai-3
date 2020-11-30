@@ -36,7 +36,6 @@ eleAdd.addEventListener('click', () => {
 
     //インプット
     todoList.push({
-        id:todoList.length,
         comment:inputComment,
         status:'作業中',
         delete:'削除'
@@ -100,7 +99,7 @@ function addTable(cntAry){
     //ID作成
     const eleOutputId = document.createElement('p');
     eleOutputId.setAttribute('id','id' + cntAry);
-    eleOutputId.textContent = todoList[cntAry]['id'];
+    eleOutputId.textContent = cntAry;
     eleOutputId.style.margin = '0';
 
     //コメント作成
@@ -173,37 +172,8 @@ function deleteAry(){
     //配列削除
     todoList.splice(cntAry, 1);
 
-    //idの振り直し
-    aryReassign();
-
     //表示更新
     changeDisplay();
-}
-
-//idの振り直し
-function aryReassign(){
-
-    //配列数取得
-    const aryNum = todoList.length;
-
-    //配列分ループ
-    for(let cntAry = 0;cntAry < aryNum;cntAry++){
-
-        //変更対象のエレメントのオブジェクト化
-        const eleId = document.getElementById('id' + cntAry);
-        const eleStatus = document.getElementById('status' + cntAry);
-        const eleDelete = document.getElementById('delete' + cntAry);
-
-        //idの振り直し
-        todoList[cntAry]['id'] = cntAry;
-        eleId.setAttribute('id','id' + cntAry);
-
-        //状態の振り直し
-        eleStatus.setAttribute('id','status' + cntAry);
-
-        //削除の振り直し
-        eleDelete.setAttribute('id','delete' + cntAry);
-    }
 }
 
 </script>
