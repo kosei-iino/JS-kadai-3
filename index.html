@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+<h1>ToDoリスト</h1>
+<form name="form" id="form" action="">
+<input type="radio" name="type" value="all" checked="checked">すべて
+<input type="radio" name="type" value="working">作業中
+<input type="radio" name="type" value="comp">完了
+
+<Table border="0" id="table">
+<tr style="font-weight:bold;">
+    <td style="text-align:center;">ID</td>
+    <td style="text-align:center;">コメント</td>
+    <td style="text-align:center;">状態</td>
+    <td style="text-align:center;"></td>
+</tr>
+</Table>
+<h2>新規タスクの追加</h2>
+<input type="text" id="input">
+<input type="button" id="add" value="追加">
+</form>
+<script>
+//アウトプット配列作成
+const todoList = [];
+
+//実行
+const eleAdd = document.getElementById('add');
+eleAdd.addEventListener('click', () => {
+
+    //テキストフィールドオブジェクト生成
+    const inputComment = document.getElementById('input').value;
+
+    //インプット
+    todoList.push({
+        comment:inputComment,
+        status:'作業中',
+        delete:'削除'
+    });
+
+    //表示更新
+    changeDisplay();
+});
+
+//表示更新
+const eleSelectType = document.getElementById('form');
+eleSelectType.addEventListener('change',changeDisplay,false);
+
+function changeDisplay(){
+
+    //テーブルをオブジェクト化
+    const eleTable = document.getElementById('table');
+
+    //ヘッダ以外のテーブル行削除(初期化)
+    while(eleTable.rows[1]) eleTable.deleteRow(1);
+
+    //ラジオボタンの状態取得
+    selectType = eleSelectType.type.value;
+
+    //配列数取得
+    const aryNum = todoList.length;
+
+    switch(selectType){
+        case 'all':
+            for(let cntAry = 0;cntAry < aryNum;cntAry++){
+                //テーブルデータ追加
+                addTable(cntAry);
+            }
+        break;
+        case 'working':
+            for(let cntAry = 0;cntAry < aryNum;cntAry++){
+
+                    //「作業中」は表示
+                    if(todoList[cntAry]['status'] === '作業中'){
+                        //テーブルデータ追加
+                        addTable(cntAry);
+                    }
+                }
+        break;
+        case 'comp':
+            for(let cntAry = 0;cntAry < aryNum;cntAry++){
+
+                //「完了」は表示
+                if(todoList[cntAry]['status'] === '完了'){
+                    //テーブルデータ追加
+                    addTable(cntAry);
+                }
+            }
+        break;
+    }
+}
+
+//テーブルデータ追加
+function addTable(cntAry){
+
+    //ID作成
+    const eleOutputId = document.createElement('p');
+    eleOutputId.setAttribute('id','id' + cntAry);
+    eleOutputId.textContent = cntAry;
+    eleOutputId.style.margin = '0';
+
+    //コメント作成
+    const eleOutputComment = document.createElement('p');
+    eleOutputComment.textContent = todoList[cntAry]['comment'];
+    eleOutputComment.style.margin = '0';
+
+    //状態ボタン作成
+    const eleOutputStatus = document.createElement('input');
+    eleOutputStatus.setAttribute('id','status' + cntAry);
+    eleOutputStatus.setAttribute('type','button');
+    eleOutputStatus.setAttribute('value',todoList[cntAry]['status']);
+
+    //削除ボタン作成
+    const eleOutputDelete = document.createElement('input');
+    eleOutputDelete.setAttribute('id','delete' + cntAry);
+    eleOutputDelete.setAttribute('type','button');
+    eleOutputDelete.setAttribute('value',todoList[cntAry]['delete']);
+
+    //テーブルをオブジェクト化
+    const eleTable = document.getElementById('table');
+
+    //行追加
+    const rowTable = eleTable.insertRow();
+
+    //セル追加
+    let cellTable = rowTable.insertCell();
+    cellTable.appendChild(eleOutputId);
+
+    cellTable = rowTable.insertCell();
+    cellTable.appendChild(eleOutputComment);
+
+    cellTable = rowTable.insertCell();
+    cellTable.appendChild(eleOutputStatus);
+
+    cellTable = rowTable.insertCell();
+    cellTable.appendChild(eleOutputDelete);
+
+    //状態ボタンに関数紐付け
+    const eleSelectType = document.getElementById('status' + cntAry);
+    eleSelectType.addEventListener('click',{num:cntAry,handleEvent:switchStatus},false);
+
+    //削除ボタンに関数紐付け
+    const eleDelete = document.getElementById('delete' + cntAry);
+    eleDelete.addEventListener('click',{num:cntAry,handleEvent:deleteAry},false);
+}
+
+//状態切り替え
+function switchStatus(){
+
+    //引数取得
+    const cntAry = this.num;
+
+    if(todoList[cntAry]['status'] === '作業中'){
+        todoList[cntAry]['status'] = '完了';
+    }else{
+        todoList[cntAry]['status'] = '作業中';
+    }
+
+    //表示更新
+    changeDisplay();
+}
+
+//配列削除
+function deleteAry(){
+
+    //引数取得
+    const cntAry = this.num;
+
+    //配列削除
+    todoList.splice(cntAry, 1);
+
+    //表示更新
+    changeDisplay();
+}
+
+</script>
+</body>
+</html>
